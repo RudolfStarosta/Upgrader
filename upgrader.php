@@ -5,29 +5,61 @@
 </head>
 <body>
 <?php
-if (extension_loaded(yaml))
-  echo "yaml loaded :)";
-else
-  echo "something is wrong :(";
 
-phpinfo();
+//----------------
+// Make it verbose
+//----------------
+
+$debug = 1;  // 0 = silent, the higher the value the more debug output
+
+if ($debug > 2) {
+  // First thing to check if strange things happen
+  phpinfo();
+}
+
+if ($debug > 2) {
+  // Check if yaml is available
+  if (extension_loaded('yaml'))
+    echo "yaml loaded :) <br/>";
+  else
+    echo "something is wrong :( <br/>";
+}
+
+// --------------
+// Initialisation
+// --------------
+
+// Read Sites and corresponding Authentication data from YAML file
+
+$ini_data = yaml_parse_file('ini_upgrader.yml');
+
+if ($debug > 0) {
+  echo "<pre>";
+  var_dump($ini_data);
+  echo "</pre>";
+
+  foreach($ini_data as $og){
+    echo "<pre>";
+    echo "Found URL:      " . $og['URL'] . "<br/>";
+    echo "      User:     " . $og['User'] . "<br/>";
+    echo "      Password: " . $og['Password'] . "<br/>";
+    echo "</pre>";
+  }
+
+}
+
+// --------------------------------------------------------
+// Go through all Sites as given in the initialisation step
+// --------------------------------------------------------
+
+// here we define a nice function to do all the stuff
 
 // ----------------
 // Login to Joomla!
 // ----------------
 
-// Initialisation
-
-// Read sites and Authentication data from YAML file
-
-$ini_data = yaml_parse_file('ini_upgrader.yml');
-var_dump($ini_data);
-
-return;
-
 $uname = "username";
 $upswd = "password";
-$debug = TRUE;
 
 //
 // Login to backend
@@ -55,7 +87,7 @@ $output = curl_exec($ch);
 
 if ($output <> FALSE)
 {
- if ($debug)
+ if ($debug > 0)
  {
    echo "<br/>" . "Got output" . "<br/>";
  }
@@ -71,7 +103,7 @@ else
  exit("Good bye :(");
 }
 
-if ($debug)
+if ($debug > 0)
 {
     echo "<pre>";
     var_dump($output);
@@ -91,7 +123,7 @@ $return = urlencode($matches[1][0]);
 preg_match_all("(<input type=\"hidden\" name=\"(.*)\" value=\"1\" />(.*)</fieldset>)iU", $output, $matches);
 $name = urlencode($matches[1][0]);
 
-if ($debug)
+if ($debug > 0)
 {
 echo "<br/>";
  echo '$return = ' . $return;
@@ -130,7 +162,7 @@ $output = curl_exec($ch);
 
 if ($output <> FALSE)
 {
- if ($debug)
+ if ($debug > 0)
  {
 	echo "<br/>" . "Logged in succesfully :)" . "<br/>";
  }
@@ -153,7 +185,7 @@ curl_setopt($ch, CURLOPT_URL,
  		    "https://eifelverein.net/eschweiler/administrator/index.php?option=com_joomlaupdate");
 $output = curl_exec($ch);
 
-if ($debug)
+if ($debug > 0)
 {
  echo "<br/>" . "Output of Update page" . "<br/>";
  var_dump($output); 
@@ -164,7 +196,7 @@ if ($upgrade)
 {
  echo "<br/>";
  echo 'No Upgrade necessary :-) <br />';
- if ($debug)
+ if ($debug > 0)
  {
  echo '$upgrade = ' . $upgrade;
  echo "<br/>";
@@ -174,7 +206,7 @@ else
 {
  echo "<br/>";
  echo 'Upgrade necessary !<br />';
- if ($debug)
+ if ($debug > 0)
  {
  echo '$upgrade = ' . $upgrade;
  echo "<br/>";
@@ -190,7 +222,7 @@ else
 preg_match_all("(task=logout&amp;(.*)=1\">)siU", $output, $matches);
 // transform to URL compatible format
 $logout_code = urlencode($matches[1][0]);
-if ($debug)
+if ($debug > 0)
 {
  echo "<br/>";
  echo '$logout_code = ' . $logout_code;
@@ -202,7 +234,7 @@ curl_setopt($ch, CURLOPT_URL,
 		    $logout_code . "=1");
 $output = curl_exec($ch);
 
-if ($debug)
+if ($debug > 0)
 {
  echo "<br/>" . "Output after logout" . "<br/>";
  var_dump($output);
