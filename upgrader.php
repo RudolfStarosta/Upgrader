@@ -1,18 +1,20 @@
 <!DOCTYPE html>
+
 <html>
 <head>
 <title>Upgrader 0.02</title>
 </head>
 <body>
+
 <?php
 
 //----------------
 // Make it verbose
 //----------------
 
-$debug = 1;  // 0 = silent, the higher the value the more debug output
+$debug = 3;  // 0 = silent, the higher the value the more debug output
 
-if ($debug > 2) {
+if ($debug > 5) {
   // First thing to check if strange things happen
   phpinfo();
 }
@@ -33,7 +35,7 @@ if ($debug > 2) {
 
 $ini_data = yaml_parse_file('ini_upgrader.yml');
 
-if ($debug > 0) {
+if ($debug > 1) {
   echo "<pre>";
   var_dump($ini_data);
   echo "</pre>";
@@ -46,20 +48,25 @@ if ($debug > 0) {
     echo "</pre>";
   }
 
-}
+}  // end debug output
 
 // --------------------------------------------------------
 // Go through all Sites as given in the initialisation step
 // --------------------------------------------------------
 
-// here we define a nice function to do all the stuff
+foreach($ini_data as $og){
+
+    echo "<pre>";
+    echo "Working on: " . $og['URL'] . "<br/>";
+    echo "</pre>";
 
 // ----------------
 // Login to Joomla!
 // ----------------
 
-$uname = "username";
-$upswd = "password";
+$url   = $og['URL'];
+$uname = $og['User'];
+$upswd = $og['Password'];
 
 //
 // Login to backend
@@ -70,7 +77,7 @@ $upswd = "password";
 // Prepare handle
 $ch = curl_init();
 // URL
-curl_setopt($ch, CURLOPT_URL, "https://eifelverein.net/eschweiler/administrator/" );
+curl_setopt($ch, CURLOPT_URL, "https://" . $url . "/administrator/" );
 // Return output of curl_exec() as a string
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE );
 // Initialize Cookies
@@ -96,14 +103,15 @@ else
 {
  $error = curl_error($ch);
  $errno = curl_errno($ch);
- echo  "<br/>" . "Call failed :(" . "<br/>" .
- 	   'errno: '. $errno . ' error: ' . $error . "<br/>";
+ echo '<br/> Call failed :( <br/>' .
+ 	    'errno: ' . $errno . '<br/>' .
+      'error: ' . $error . '<br/>';
  // close curl resource to free up system resources
  curl_close($ch);
  exit("Good bye :(");
 }
 
-if ($debug > 0)
+if ($debug > 2)
 {
     echo "<pre>";
     var_dump($output);
@@ -123,7 +131,7 @@ $return = urlencode($matches[1][0]);
 preg_match_all("(<input type=\"hidden\" name=\"(.*)\" value=\"1\" />(.*)</fieldset>)iU", $output, $matches);
 $name = urlencode($matches[1][0]);
 
-if ($debug > 0)
+if ($debug > 2)
 {
 echo "<br/>";
  echo '$return = ' . $return;
@@ -146,7 +154,7 @@ $postdata = "username=".urlencode($uname)      .
             "&return=" .$return                .
             "&".$name  ."=1";
 curl_setopt($ch, CURLOPT_URL,
-		    "https://eifelverein.net/eschweiler/administrator/index.php?option=com_login&task=login&lang=de-DE");
+		    "https://" . $url .  "/administrator/index.php?option=com_login&task=login&lang=de-DE");
 curl_setopt($ch, CURLOPT_POST, TRUE);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $postdata);
 
@@ -156,13 +164,13 @@ $output = curl_exec($ch);
 // Get output
 
 curl_setopt($ch, CURLOPT_URL,
- 		    "https://eifelverein.net/eschweiler/administrator/index.php");
+ 		    "https://" . $url . "/administrator/index.php");
 curl_setopt($ch, CURLOPT_POST, FALSE);
 $output = curl_exec($ch);
 
 if ($output <> FALSE)
 {
- if ($debug > 0)
+ if ($debug > 2)
  {
 	echo "<br/>" . "Logged in succesfully :)" . "<br/>";
  }
@@ -182,10 +190,10 @@ else
 //
 
 curl_setopt($ch, CURLOPT_URL,
- 		    "https://eifelverein.net/eschweiler/administrator/index.php?option=com_joomlaupdate");
+ 		    "https://" . $url . "/administrator/index.php?option=com_joomlaupdate");
 $output = curl_exec($ch);
 
-if ($debug > 0)
+if ($debug > 2)
 {
  echo "<br/>" . "Output of Update page" . "<br/>";
  var_dump($output); 
@@ -196,7 +204,7 @@ if ($upgrade)
 {
  echo "<br/>";
  echo 'No Upgrade necessary :-) <br />';
- if ($debug > 0)
+ if ($debug > 1)
  {
  echo '$upgrade = ' . $upgrade;
  echo "<br/>";
@@ -206,7 +214,7 @@ else
 {
  echo "<br/>";
  echo 'Upgrade necessary !<br />';
- if ($debug > 0)
+ if ($debug > 1)
  {
  echo '$upgrade = ' . $upgrade;
  echo "<br/>";
@@ -222,7 +230,7 @@ else
 preg_match_all("(task=logout&amp;(.*)=1\">)siU", $output, $matches);
 // transform to URL compatible format
 $logout_code = urlencode($matches[1][0]);
-if ($debug > 0)
+if ($debug > 1)
 {
  echo "<br/>";
  echo '$logout_code = ' . $logout_code;
@@ -230,11 +238,11 @@ if ($debug > 0)
 }
 
 curl_setopt($ch, CURLOPT_URL,
- 		    "https://eifelverein.net/eschweiler/administrator/index.php?option=com_login&task=logout&" .
+ 		    "https://" . $url . "/administrator/index.php?option=com_login&task=logout&" .
 		    $logout_code . "=1");
 $output = curl_exec($ch);
 
-if ($debug > 0)
+if ($debug > 1)
 {
  echo "<br/>" . "Output after logout" . "<br/>";
  var_dump($output);
@@ -242,6 +250,16 @@ if ($debug > 0)
 
 // close curl resource to free up system resources
 curl_close($ch);
+
+} // end foreach($ini_data as $og)
+
+if ($debug > 0)
+{
+ echo "<br/>";
+ echo 'Finished all sites!';
+ echo "<br/>";
+}
+
 
 ?>
 
