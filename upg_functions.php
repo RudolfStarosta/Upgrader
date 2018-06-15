@@ -1,42 +1,13 @@
-<!DOCTYPE html>
-
-<html>
-<head>
-<title>Upgrader 0.02</title>
-</head>
-<body>
-
 <?php
+// Functions used in upgrader.php
 
-// Include function from separate file
+function initialize()
+{
+    // Function to read steering YAML file
 
-require 'upg_functions.php';
-
-//----------------
-// Make it verbose
-//----------------
-
-$debug = 3;  // 0 = silent, the higher the value the more debug output
-
-initialize();
-
-if ($debug > 5) {
-  // First thing to check if strange things happen
-  phpinfo();
+    echo 'Upgrader: Debug level is ' . $GLOBALS['debug'] . '<br/>';
 }
 
-if ($debug > 2) {
-  // Check if yaml is available
-  if (extension_loaded('yaml'))
-    echo "Upgrader: yaml loaded :) <br/>";
-  else
-    echo "something is wrong :( <br/>";
-}
-
-
-// --------------
-// Initialisation
-// --------------
 
 // Read Sites and corresponding Authentication data from YAML file
 
@@ -56,6 +27,8 @@ if ($debug > 1) {
   }
 
 }  // end debug output
+
+function doit(){
 
 // --------------------------------------------------------
 // Go through all Sites as given in the initialisation step
@@ -265,9 +238,5 @@ if ($debug > 0)
  echo 'Finished all sites!';
  echo "<br/>";
 }
-
-
+}
 ?>
-
-</body>
-</html>

@@ -1,8 +1,20 @@
--
- URL: eifelverein-eschweiler.de
- User: kontoname eschweiler
- Password: guesswhich
--
- URL: eifelverein-roetgen.de
- User: kontoname für roetgen
- Password: guesswhich
+#
+# This file controls Upgrader's operation.
+#
+File: ini_upgrader.yml
+Changes:
+  - 20180615 by R. Starosta, Initial version
+#
+# Debugging level, 0 = no debugging, 10 = maximal verbosity
+#
+DebugLevel: 6
+#
+# List of site which need to be upgraded including protocol (http / https)
+#
+Sites:
+- URL: http://site1.xx
+  User: account 1
+  Password: guess which
+- URL: http://site1.xx
+  User: account 2
+  Password: guess which
