@@ -1,32 +1,141 @@
 <?php
-// Functions used in upgrader.php
+// Definitions used in upgrader.php
+include_once 'upg_definitions.inc.php';
 
-function initialize()
-{
-    // Function to read steering YAML file
+// Globals used in upgrader.php
+include      'upg_globals.inc.php';
 
-    echo 'Upgrader: Debug level is ' . $GLOBALS['debug'] . '<br/>';
+function up_exit(){
+  
+  // ------------------------------------------------------------------------------------
+  //
+  // Function:    up_exit()
+  // Purpose:     Write HTML document footer information and
+  //              exit Upgrader
+  // Last change: 180620 by RST
+  //
+  // ------------------------------------------------------------------------------------
+  
+  echo <<< EOT
+
+</body>
+</html>
+EOT;
+
+  exit();
 }
 
+function up_header(){
+  
+  // ------------------------------------------------------------------------------------
+  //
+  // Function:    up_header()
+  // Purpose:     Write HTML document header information
+  // Last change: 180620 by RST
+  //
+  // ------------------------------------------------------------------------------------
+  
+  echo <<< EOT
+<!DOCTYPE html>
 
-// Read Sites and corresponding Authentication data from YAML file
+<!--
 
-$ini_data = yaml_parse_file('ini_upgrader.yml');
+  Main file of the Upgrader application
+  
+-->
 
-if ($debug > 1) {
-  echo "<pre>";
-  var_dump($ini_data);
-  echo "</pre>";
+<html lang="en">
+<head>
+<title>Upgrader
+EOT;
+  
+  echo VERSION . "</title>";
+  
+  echo <<< EOT
+  
+</head>
+<body>
 
-  foreach($ini_data as $og){
-    echo "<pre>";
-    echo "Found URL:      " . $og['URL'] . "<br/>";
-    echo "      User:     " . $og['User'] . "<br/>";
-    echo "      Password: " . $og['Password'] . "<br/>";
-    echo "</pre>";
+EOT;
+  
+}
+
+function up_initialize(){
+  
+  // ------------------------------------------------------------------------------------
+  //
+  // Function:    up_initialize()
+  // Purpose:     Read yaml file and set global variables
+  //              accordingly
+  // Last change: 180620 by RST
+  //
+  // ------------------------------------------------------------------------------------
+  
+  
+  include 'upg_globals.inc.php';
+  // Function to read steering YAML file
+  // Read steerung data from yaml
+  
+  $ini_data = yaml_parse_file('ini_upgrader.yml');
+  
+  if (isset($ini_data['DebugLevel'])){
+    $debug = $ini_data['DebugLevel'];
+    up_tell(__FUNCTION__, __FILE__, __LINE__, 'Information: DebugLevel found in yaml file.');
+  } else {
+    $debug = MAX_DEBUG_LEVEL;
+    up_tell(__FUNCTION__, __FILE__, __LINE__, 'Warning: No DebugLevel found in yaml file.');
   }
 
-}  // end debug output
+  if ($debug > 1) {
+    echo "<pre>";
+    var_dump($ini_data);
+    echo "</pre>";
+    
+    foreach($ini_data['Sites'] as $og){
+      echo "<pre>";
+      echo "Found URL:      " . $og['URL'] . "<br/>";
+      echo "      User:     " . $og['User'] . "<br/>";
+      echo "      Password: " . $og['Password'] . "<br/>";
+      echo "</pre>";
+    }
+  }  // end debug output
+
+  if ($debug > 5) {
+    // First thing to check if strange things happen
+    phpinfo();
+  }
+  
+  if ($debug > 2) {
+    // Check if yaml is available
+    if (extension_loaded('yaml'))
+      echo "Upgrader: yaml loaded :) <br/>";
+    else
+      echo "something is wrong :( <br/>";
+  }
+  
+}
+
+function up_tell($src_function, $src_file, $src_line, $text){
+  
+  // ------------------------------------------------------------------------------------
+  //
+  // Function:    up_tell()
+  // Purpose:     Write messages enhanced with default information
+  // Last change: 180620 by RST
+  //
+  // ------------------------------------------------------------------------------------
+  
+  include 'upg_globals.inc.php';
+
+  echo "<pre>";
+  echo 'Upgrader / DebugLevel: ' . $debug . '<br/>';
+  echo 'Function: ' . $src_function . '<br/>';
+  echo 'File:     ' . $src_file . '<br/>';
+  echo 'Line:     ' . $src_line . '<br/>';
+  echo 'Message:  ' . $text . '<br/>';
+  echo "</pre>";
+
+}
 
 function doit(){
 
@@ -84,11 +193,11 @@ else
  $error = curl_error($ch);
  $errno = curl_errno($ch);
  echo '<br/> Call failed :( <br/>' .
- 	    'errno: ' . $errno . '<br/>' .
+ 	  'errno: ' . $errno . '<br/>' .
       'error: ' . $error . '<br/>';
  // close curl resource to free up system resources
  curl_close($ch);
- exit("Good bye :(");
+ up_exit();
 }
 
 if ($debug > 2)

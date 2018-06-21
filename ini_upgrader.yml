@@ -7,7 +7,7 @@ Changes:
 #
 # Debugging level, 0 = no debugging, 10 = maximal verbosity
 #
-DebugLevel: 6
+DebugLevel: 5
 #
 # List of site which need to be upgraded including protocol (http / https)
 #

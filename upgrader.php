@@ -1,38 +1,12 @@
-<!DOCTYPE html>
-
-<html>
-<head>
-<title>Upgrader 0.02</title>
-</head>
-<body>
-
 <?php
 
-// Include function from separate file
+// Include functions and definitions from separate file
 
-require 'upg_functions.php';
+require 'upg_functions.inc.php';
 
-//----------------
-// Make it verbose
-//----------------
+up_header();
 
-$debug = 3;  // 0 = silent, the higher the value the more debug output
-
-initialize();
-
-if ($debug > 5) {
-  // First thing to check if strange things happen
-  phpinfo();
-}
-
-if ($debug > 2) {
-  // Check if yaml is available
-  if (extension_loaded('yaml'))
-    echo "Upgrader: yaml loaded :) <br/>";
-  else
-    echo "something is wrong :( <br/>";
-}
-
+up_initialize();
 
 // --------------
 // Initialisation
@@ -111,11 +85,11 @@ else
  $error = curl_error($ch);
  $errno = curl_errno($ch);
  echo '<br/> Call failed :( <br/>' .
- 	    'errno: ' . $errno . '<br/>' .
+ 	  'errno: ' . $errno . '<br/>' .
       'error: ' . $error . '<br/>';
  // close curl resource to free up system resources
  curl_close($ch);
- exit("Good bye :(");
+ up_exit();
 }
 
 if ($debug > 2)
@@ -266,8 +240,4 @@ if ($debug > 0)
  echo "<br/>";
 }
 
-
 ?>
-
-</body>
-</html>
